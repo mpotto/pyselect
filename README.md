@@ -1,2 +1,3 @@
-# rff-svs-dev
-Software development for RFF+SVS project.
+# RFF + SVS: Methodology
+
+Methodolgoy, particulary software, development for the **RFF + SVS** project.
