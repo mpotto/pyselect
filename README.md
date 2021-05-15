@@ -1,3 +1,3 @@
 # RFF + SVS: Methodology
 
-Methodolgoy, particulary software, development for the **RFF + SVS** project.
+Development repo for the **RFF + SVS** project.
