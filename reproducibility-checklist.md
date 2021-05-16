@@ -1,12 +1,12 @@
 # The Machine Learning Reproducibility Checklist
 
 ## Models and Algorithms
-* [ ] A clear description of the mathematical setting, algorithm, and/or model.
+* [ ] A clear description of the mathematical setting, algorithm, and/or model. (**priority**)
 * [ ] A clear explanation of any assumptions.
 * [ ] An analysis of the complexity (time, space, sample size) of any algorithm.
 
 ## Theoretical Claims
-* [ ] A clear statement of the claim.
+* [ ] A clear statement of the claim (**priority**)
 * [ ] A complete proof of the claim. 
 
 ## Datasets
@@ -17,7 +17,7 @@
 * [ ] For new data collected, a complete description of the data collection process, such as instructions to annotators and methods for quality control.
 
 ## Code
-* [ ] Specification of dependencies.
+* [x] Specification of dependencies.
 * [ ] Training code.
 * [ ] Evaluation code
 * [ ] (Pre-)trained model(s).
