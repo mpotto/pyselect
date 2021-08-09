@@ -1,0 +1,11 @@
+# .flake8
+[flake8]
+select = DAR, D, B, B9, BLK, C, E, F, I, W
+max-complexity = 10
+# W503: line break before binary operator
+# D105: missing docstring in magic method.
+ignore = E203, E501, B950, D105, W503
+max-line-length = 88
+import-order-style = google
+docstring-convention = google
+application-import-names = pyselect,tests   
