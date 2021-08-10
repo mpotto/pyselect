@@ -100,12 +100,12 @@ class Trainer:
 def config():
     train_filename = "./data/synth-2000-100-10-train.pt"
     test_filename = "./data/synth-2000-100-10-test.pt"
-    learning_rate = 1e-3
+    learning_rate = 0.004216025368528044
     n_features = 100
-    R = 500
+    R = 486
     sampler = torch.randn
     num_epochs = 1000
-    batch_size = 20
+    batch_size = 32
     model_file = "models/model.ckpt"
 
 
