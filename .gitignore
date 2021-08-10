@@ -135,6 +135,8 @@ package.json
 # Data and Experiments
 **/data
 **/experiments
+**/optimization
 
 # Models
 **/models
+
