@@ -133,10 +133,11 @@ dmypy.json
 package.json
 
 # Data and Experiments
-**/data
+**/data/**
+!**/data/README.md
 **/experiments
 **/optimization
 
 # Models
-**/models
+**/models/*.ckpt
 
