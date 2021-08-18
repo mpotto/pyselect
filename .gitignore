@@ -136,8 +136,8 @@ package.json
 **/data
 
 # Experiments and Optimization
-**/experiments
-**/optimization
+**/experiments/**/*.pth
+**/optimization/**/*.pth
 
 # Neptune
 **/.neptune
