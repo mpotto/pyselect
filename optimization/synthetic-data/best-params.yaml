@@ -1,0 +1,8 @@
+batch_size: 32
+learning_rate: 0.031493093263539405
+model_name: optimization/synthetic-data/optimized.pth
+n_epochs: 1000
+n_features: 100
+out_features: 483
+test_filename: data/prepared/synth-2000-100-10/test.pt
+train_filename: data/prepared/synth-2000-100-10/train.pt
