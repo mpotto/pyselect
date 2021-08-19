@@ -3,7 +3,10 @@
 import yaml
 import os
 
+import matplotlib.pyplot as plt
+import numpy as np
 import neptune.new as neptune
+from neptune.new.types import File
 import torch
 import torch.nn as nn
 import torch.optim as optim
@@ -13,7 +16,7 @@ from pyselect import layers, networks
 
 run = neptune.init(
     project="mpotto/pyselect",
-    tags="Experiment",
+    tags=["Experiment", "Synthetic data"],
     api_token=os.environ.get("NEPTUNE_API_TOKEN"),
     source_files=["experiments/synthetic-data/*.py"],
 )
@@ -71,6 +74,62 @@ with torch.no_grad():
     y_pred = model(X_test)
     test_loss = loss_fn(y_pred, y_test)
 
+
 run["test/test_loss"] = test_loss
+
+## Add histogram with bandwidths of model.
+coefs = torch.load(params["coef_filename"]).squeeze(1).numpy()
+bands = model.state_dict()["rff_net.0.bandwidths"].numpy()
+
+inf_features = np.abs(coefs) >= 1e-4
+
+inf_bands = bands[inf_features]
+noninf_bands = bands[~inf_features]
+
+lim = np.abs(bands).max()
+bins = np.linspace(-lim * 1.1, lim * 1.1, 40)
+
+plt.style.use("figures/pyselect.mplstyle")
+fig = plt.figure()
+plt.hist(inf_bands, bins=bins, rwidth=0.8, color="crimson", label="Informative")
+plt.hist(
+    noninf_bands,
+    bins=bins,
+    rwidth=0.8,
+    color="black",
+    alpha=0.4,
+    label="Non-informative",
+)
+plt.xlabel(r"1/$\sigma$")
+plt.ylabel("Frequency")
+plt.legend(loc="best")
+
+run["figures/band-histogram"] = File.as_image(fig)
+
+index = np.array(list(range(0, params["n_features"])))
+inf_index = index[inf_features]
+noninf_index = index[~inf_features]
+
+fig = plt.figure()
+plt.bar(
+    inf_index,
+    np.abs(bands[inf_features]),
+    color="crimson",
+    width=0.9,
+    label="Informative",
+)
+plt.bar(
+    noninf_index,
+    np.abs(bands[~inf_features]),
+    color="black",
+    alpha=0.4,
+    label="Non-informative",
+)
+ax = plt.gca()
+ax.ticklabel_format(axis="x", style="plain")
+ax.set_xlabel("Coefficient Index")
+ax.set_ylabel(r"$| 1/\sigma |$")
+
+run["figures/coefficients-bands"] = File.as_image(fig)
 
 run.stop()

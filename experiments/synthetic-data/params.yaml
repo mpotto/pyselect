@@ -1,9 +1,11 @@
 train_filename: "data/prepared/synth-2000-100-10/train.pt"
 test_filename: "data/prepared/synth-2000-100-10/test.pt"
+coef_filename: "data/raw/synth-2000-100-10/coef.pt"
+data_dir: "data/prepared/synth-2000-100-10"
 n_features: 100
 out_features: 500
 learning_rate: 0.001
 batch_size: 32
-seed: 42
+seed: 50
 n_epochs: 1000
 model_name: "experiments/synthetic-data/basemodel.pth"
