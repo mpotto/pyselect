@@ -53,7 +53,7 @@ run["config/hyperparameters"] = params
 
 for epoch in range(params["n_epochs"]):
     model.train()
-    for epoch, (x, y) in enumerate(train_dataloader):
+    for batch, (x, y) in enumerate(train_dataloader):
         output = model(x)
         loss = loss_fn(output, y)
 
@@ -62,6 +62,7 @@ for epoch in range(params["n_epochs"]):
         optimizer.zero_grad()
         loss.backward()
         optimizer.step()
+
 
 torch.save(model.state_dict(), params["model_name"])
 run["model/dict"].upload(params["model_name"])
@@ -75,7 +76,14 @@ with torch.no_grad():
     test_loss = loss_fn(y_pred, y_test)
 
 
-run["test/test_loss"] = test_loss
+run["logs/test/test_loss"] = test_loss
+
+with torch.no_grad():
+    for batch, (x, y) in enumerate(test_dataloader, 0):
+        output = model(x)
+        loss = loss_fn(output, y)
+
+        run["logs/test/batch/loss"].log(loss)
 
 ## Add histogram with bandwidths of model.
 coefs = torch.load(params["coef_filename"]).squeeze(1).numpy()
