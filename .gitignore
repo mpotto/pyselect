@@ -142,3 +142,5 @@ package.json
 # Neptune
 **/.neptune
 
+# Prototyping Notebook
+notebooks/prototyping.ipynb
