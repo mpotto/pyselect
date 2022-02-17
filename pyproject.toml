@@ -16,12 +16,12 @@ ipykernel = "^5.5.5"
 jupyter = "^1.0.0"
 matplotlib = "^3.4.2"
 sklearn = "^0.0"
+pandas = "^1.4.0"
+jupyterlab = "^3.2.8"
 pytorch-ignite = "^0.4.8"
+ipywidgets = "^7.6.5"
 
 [tool.poetry.dev-dependencies]
-ipywidgets = "^7.6.5"
-jupyterlab = "^3.2.8"
-pandas = "^1.4.0"
 pytest = "^6.2.4"
 coverage = { extras = ["toml"], version = "^5.5" }
 pytest-cov = "^2.12.0"
