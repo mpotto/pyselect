@@ -131,16 +131,3 @@ dmypy.json
 # VSCode
 .vscode/
 package.json
-
-# Data and Experiments
-**/data
-
-# Experiments and Optimization
-**/experiments/**/*.pth
-**/optimization/**/*.pth
-
-# Neptune
-**/.neptune
-
-# Prototyping Notebook
-notebooks/prototyping.ipynb
