@@ -1,6 +1,5 @@
 # src/pyselect/synthesizer.py
 """Data synthesizer for running experiments."""
-# TODO: add a class that inherits from Dataset and DataLoader
 import numpy as np
 import torch
 
@@ -35,10 +34,57 @@ def make_regression_with_tensors(
     return X, y, coef
 
 
-def gregorova_se1(n_samples: int = 100, n_features: int = 18, noise: float = 0.0):
+def gregorova_se1(train_size: int = 10 ** 3, test_size: int = 500):
     """Gregorova *et al* article Synthetic Experiment 1."""
-    X = torch.randn(n_samples, n_features)
-
-    y = torch.sin((X[:, 0] + X[:, 2]) ** 2) * torch.sin(X[:, 6] * X[:, 7] * X[:, 8])
+    noise = 0.1
+    n_samples = train_size + 2 * test_size
+    X = torch.randn(n_samples, 18)
+    y = torch.sin(torch.square(X[:, 0] + X[:, 2])) * torch.sin(
+        X[:, 6] * X[:, 7] * X[:, 8]
+    )
     y_noise = y.unsqueeze(-1) + noise * torch.randn(n_samples).unsqueeze(-1)
-    return X, y_noise
+
+    X_train = X[:train_size, :]
+    y_train = y_noise[:train_size]
+
+    y_train_mean = y_train.mean()
+
+    y_train = y_train - y_train_mean
+    X_val = X[train_size : train_size + test_size, :]
+    y_val = y_noise[train_size : train_size + test_size] - y_train_mean
+    X_test = X[train_size + test_size :, :]
+    y_test = y_noise[train_size + test_size :] - y_train_mean
+
+    return X_train, y_train, X_val, y_val, X_test, y_test
+
+
+def gregorova_se2(train_size: int = 10 ** 3, test_size: int = 500):
+    """Gregorova *et al* article Synthetic Experiment 2."""
+    noise = 0.1
+    n_samples = train_size + 2 * test_size
+    X = torch.randn(n_samples, 100)
+    y = torch.log(torch.square(torch.sum(X[:, 10:15], axis=1)))
+    y_noise = y.unsqueeze(-1) + noise * torch.randn(n_samples)
+
+    X_train = X[:train_size, :]
+    y_train = y_noise[:train_size]
+
+    y_train_mean = y_train.mean()
+
+    y_train = y_train - y_train_mean
+    X_val = X[train_size : train_size + test_size, :]
+    y_val = y_noise[train_size : train_size + test_size] - y_train_mean
+    X_test = X[train_size + test_size :, :]
+    y_test = y_noise[train_size + test_size :] - y_train_mean
+    return X_train, y_train, X_val, y_val, X_test, y_test
+
+
+def train_val_test_split(X, y, train_size, val_size, test_size):
+    """Split dataset in train, validation and test parts."""
+    X_train = X[:train_size, :]
+    y_train = y[:train_size]
+    X_val = X[train_size : train_size + val_size, :]
+    y_val = y[train_size : train_size + val_size]
+    X_test = X[train_size + val_size : train_size + val_size + test_size, :]
+    y_test = y[train_size + val_size : train_size + val_size + test_size]
+    return X_train, y_train, X_val, y_val, X_test, y_test
