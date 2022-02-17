@@ -1,6 +1,0 @@
-train_filename: "data/prepared/synth-2000-100-10/train.pt"
-test_filename: "data/prepared/synth-2000-100-10/test.pt"
-n_features: 100
-batch_size: 32
-n_epochs: 1000
-model_name: "optimization/synthetic-data/optimized.pth"
