@@ -49,8 +49,14 @@ class RandomFourierFeaturesLayer(nn.Module):
         super(RandomFourierFeaturesLayer, self).__init__()
         self.in_features = in_features
         self.out_features = out_features
-        self._omega_sample = sampler(self.in_features, self.out_features)
-        self._unif_sample = torch.rand(self.out_features) * 2 * np.pi
+        self.register_buffer(
+            "_omega_sample",
+            sampler(self.in_features, self.out_features),
+            persistent=True,
+        )
+        self.register_buffer(
+            "_unif_sample", torch.rand(self.out_features) * 2 * np.pi, persistent=True
+        )
 
     def forward(self, x):
         """Compute the approximate feature map for the input vector."""
