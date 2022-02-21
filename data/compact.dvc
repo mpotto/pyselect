@@ -1,0 +1,5 @@
+outs:
+- md5: 54478399e7c246de3f8dec04914535b2.dir
+  size: 2166885
+  nfiles: 5
+  path: compact
