@@ -2,6 +2,7 @@
 """Data synthesizer for running experiments."""
 import numpy as np
 import torch
+from torch.distributions import MultivariateNormal
 
 
 def make_regression_with_tensors(
@@ -77,6 +78,52 @@ def gregorova_se2(train_size: int = 10 ** 3, test_size: int = 500):
     X_test = X[train_size + test_size :, :]
     y_test = y_noise[train_size + test_size :] - y_train_mean
     return X_train, y_train, X_val, y_val, X_test, y_test
+
+
+def jordan_se1(
+    n_samples: int = 200,
+    n_features: int = 2,
+    rho: float = 0.5,
+    noise_level: float = 0.1,
+):
+    """Jordan *et al* article Synthetic Experiment 1."""
+    features_indices = np.arange(1, n_features + 1)
+    col_indices, row_indices = np.meshgrid(features_indices, features_indices)
+    power_matrix = np.abs(col_indices - row_indices)
+    cov = torch.Tensor(rho ** power_matrix)
+    loc = torch.zeros(n_features)
+    normal_dist = MultivariateNormal(loc, covariance_matrix=cov)
+    X = normal_dist.sample((n_samples,))
+    y_noise = X[:, 0] + noise_level * torch.randn(n_samples)
+    y = y_noise.unsqueeze(-1)
+    return X, y
+
+
+def jordan_se2(
+    n_samples: int = 300,
+    n_features: int = 10,
+    rho: float = 0.5,
+    noise_level: float = 0.1,
+):
+    """Jordan *et al* article Synthetic Experiment 2."""
+    features_indices = np.arange(1, n_features + 1)
+    col_indices, row_indices = np.meshgrid(features_indices, features_indices)
+    power_matrix = np.abs(col_indices - row_indices)
+    cov = torch.Tensor(rho ** power_matrix)
+    loc = torch.zeros(n_features)
+    normal_dist = MultivariateNormal(loc, covariance_matrix=cov)
+    X = normal_dist.sample((n_samples,))
+    y_noise = X[:, 0] ** 3 + X[:, 1] ** 3 + noise_level * torch.randn(n_samples)
+    y = y_noise.unsqueeze(-1)
+    return X, y
+
+
+def jordan_se3(n_samples: int = 200, n_features: int = 10, noise_level: float = 0.1):
+    """Jordan *et al* article Synthetic Experiment 3."""
+    X = torch.randn((n_samples, n_features))
+    y_noise = X[:, 0] * X[:, 1] + noise_level * torch.randn(n_samples)
+    y = y_noise.unsqueeze(-1)
+    return X, y
 
 
 def train_val_test_split(X, y, train_size, val_size, test_size):
