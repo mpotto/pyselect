@@ -137,5 +137,5 @@ package.json
 .flake8
 
 # Remove data
-data/*
-data/
+data/**
+data
