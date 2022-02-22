@@ -135,3 +135,7 @@ package.json
 # Linting and bug fixing
 .darglint
 .flake8
+
+# Remove data
+data/*
+data/
