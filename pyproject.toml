@@ -13,16 +13,19 @@ authors = ["Mateus Otto <mateus.potto@usp.br>"]
 python = ">=3.8,<4.0"
 torch = "^1.8.1"
 numpy = "^1.22.2"
-
-[tool.poetry.dev-dependencies]
+omegaconf = "^2.1.1"
+hydra-core = "^1.1.1"
+pytorch-ignite = "^0.4.8"
 ipykernel = "^5.5.5"
+jupyterlab = "^3.2.8"
+ipywidgets = "^7.6.5"
 jupyter = "^1.0.0"
 matplotlib = "^3.4.2"
 sklearn = "^0.0"
-jupyterlab = "^3.2.8"
-pytorch-ignite = "^0.4.8"
-ipywidgets = "^7.6.5"
 pandas = "^1.4.0"
+optuna = "^2.9.1"
+
+[tool.poetry.dev-dependencies]
 pytest = "^6.2.4"
 coverage = { extras = ["toml"], version = "^5.5" }
 pytest-cov = "^2.12.0"
@@ -35,7 +38,6 @@ flake8-import-order = "^0.18.1"
 flake8-docstrings = "^1.6.0"
 black = "^21.7b0"
 darglint = "^1.8.0"
-optuna = "^2.9.1"
 psutil = "^5.8.0"
 
 [build-system]
