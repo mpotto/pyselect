@@ -1,16 +1,19 @@
 # src/pyselect/layers.py
 """Custom layers for pyselect."""
+from typing import Callable
+
 import numpy as np
 import torch
 import torch.nn as nn
+from torch import Tensor, Generator
 
 
 class HadamardLayer(nn.Module):
     """Hadamard layer of bandwidths with constant initialization.
 
-    Attributes:
-        in_features: Number of features in the input tensor.
-        val: Initial value of the bandwidths vector entries. Default value is 0.0
+    Args:
+        in_features (int): Number of features in the input tensor.
+        val (float): Initial value of the bandwidths vector entries. Default value is 0.0
     """
 
     # TODO: consistent broadcasting, bandwidth initialization, named tensors
@@ -40,22 +43,32 @@ class RandomFourierFeaturesLayer(nn.Module):
     Attributes:
         in_features: Number of features in the input tensor.
         out_features: Number of features in the output tensor.
-        sampler: Callable that samples from the chosen distribution. Determines the kernel the RFF method is aproximating.
+        sampler: Callable that samples from the chosen distribution. Determines
+        the kernel the RFF method is aproximating.
+        generator: torch generator object that manages the state of algorithm
+        that produes pseudo random numbers
     """
 
-    # TODO: parameter tracking (is bw tracked?), named tensors
-    def __init__(self, in_features: int, out_features: int, sampler):
+    def __init__(
+        self,
+        in_features: int,
+        out_features: int,
+        sampler: Callable[[int, int, Generator], Tensor] = torch.randn,
+        generator: Generator = torch.default_generator,
+    ):
         """Constructor of Random Fourier Features Layer."""
         super(RandomFourierFeaturesLayer, self).__init__()
         self.in_features = in_features
         self.out_features = out_features
         self.register_buffer(
             "_omega_sample",
-            sampler(self.in_features, self.out_features),
+            sampler(self.in_features, self.out_features, generator=generator),
             persistent=True,
         )
         self.register_buffer(
-            "_unif_sample", torch.rand(self.out_features) * 2 * np.pi, persistent=True
+            "_unif_sample",
+            torch.rand(self.out_features, generator=generator) * 2 * np.pi,
+            persistent=True,
         )
 
     def forward(self, x):
