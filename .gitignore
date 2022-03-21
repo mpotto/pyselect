@@ -140,3 +140,10 @@ package.json
 data/**
 data/
 !**/config/data
+
+# Remove studies
+baselines/
+baselines/
+studies/
+studies/**
+
