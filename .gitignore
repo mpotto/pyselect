@@ -138,4 +138,5 @@ package.json
 
 # Remove data
 data/**
-data
+data/
+!**/config/data
