@@ -1,0 +1,39 @@
+n_epochs: 201
+device: "gpu"
+log_rate: 20
+
+seed: 16371051889608979414
+
+tuner:
+  n_trials: 50    
+  seed: 0        
+
+dataloader:
+  batch_size: 32
+
+optimizer:
+  lr: 
+    low: 1e-4
+    high: 1e-1
+    log: True
+  reg_param:
+    low: 1e-8
+    high: 1e-3
+    log: True
+
+scheduler:
+  n_steps: 5
+  gamma: 0.9
+
+defaults:
+  - dataset: "se1"
+  - model: "linear"
+  - override hydra/hydra_logging: disabled
+  - _self_
+
+hydra:
+  run: 
+    dir: ../tmp
+  output_subdir: null
+  sweep:
+    dir: ../tmp
