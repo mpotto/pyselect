@@ -69,7 +69,7 @@ def gregorova_se2(
     X = torch.randn(n_samples, 100, generator=generator)
     y_noise = torch.log(
         torch.square(torch.sum(X[:, 10:15], axis=1))
-    ) + noise * torch.randn(n_samples, generator)
+    ) + noise * torch.randn(n_samples, generator=generator)
     y = y_noise.unsqueeze(-1)
     return X, y
 
