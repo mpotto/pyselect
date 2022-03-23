@@ -2,7 +2,6 @@
 """
 High-level functions to ease model training from hydra configuration files.
 """
-import logging
 import os
 from typing import Tuple, Union
 
