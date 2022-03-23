@@ -1,11 +1,10 @@
 # experiments/gregorova/scripts/data.py
 import os
-from typing import Callable, Tuple
+from typing import Tuple
 
 import hydra
 import torch
 from omegaconf import DictConfig
-from torch import Tensor
 from torch.utils.data import Subset, TensorDataset, random_split
 
 from pyselect.data import gregorova_se1, gregorova_se2
