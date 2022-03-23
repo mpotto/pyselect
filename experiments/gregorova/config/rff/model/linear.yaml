@@ -1,4 +1,4 @@
-in_features: 18
+in_features: 100
 out_features:
   low: 50
   high: 1000

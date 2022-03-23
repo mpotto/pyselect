@@ -1,5 +1,5 @@
 n_epochs: 201
-device: "gpu"
+device: "cpu"
 log_rate: 20
 
 seed: 16371051889608979414
@@ -26,7 +26,7 @@ scheduler:
   gamma: 0.9
 
 defaults:
-  - dataset: "se1"
+  - dataset: "se2"
   - model: "linear"
   - override hydra/hydra_logging: disabled
   - _self_

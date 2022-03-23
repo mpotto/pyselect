@@ -11,7 +11,7 @@ lambda_step: 0.2
 seed: 16371051889608979414
 
 defaults:
-  - dataset: "se1"
+  - dataset: "se2"
   - override hydra/hydra_logging: disabled
   - override hydra/job_logging: disabled
   - _self_

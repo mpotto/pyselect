@@ -1,4 +1,4 @@
-name: "se1"
+name: "se2"
 train_size: 2000
 test_size: 1000
 path: ../data
