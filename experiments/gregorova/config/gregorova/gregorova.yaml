@@ -1,0 +1,24 @@
+max_iter_gamma: 100
+max_iter_srf: 1000
+num_avg_samples: 5
+update_threshold: 1e-5
+out_features: 300
+kernel_param: 1.0
+lambda_min: -9.8
+lambda_max: 0.0
+lambda_step: 0.2
+
+seed: 16371051889608979414
+
+defaults:
+  - dataset: "se1"
+  - override hydra/hydra_logging: disabled
+  - override hydra/job_logging: disabled
+  - _self_
+
+hydra:
+  run: 
+    dir: .
+  output_subdir: null
+  sweep:
+    dir: ../tmp
