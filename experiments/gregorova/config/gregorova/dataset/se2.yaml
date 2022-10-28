@@ -1,5 +1,0 @@
-name: "se2"
-train_size: 1000
-val_size: 1000
-test_size: 1000
-path: ../data

@@ -146,4 +146,8 @@ baselines/
 baselines/
 studies/
 studies/**
+deprecated/
+deprecated/**
+seminars/
+semianrs/**
 

@@ -1,31 +1,31 @@
 [tool.poetry]
 name = "pyselect"
 version = "0.1.0"
-description = "A package for embedding variable selection in machine learning algorithms."
+description = "A package for feature importances in kernel methods."
 license = "MIT"
 readme = "README.md"
-homepage = "https://github.com/mpotto/pyselect"
-repository = "https://github.com/mpotto/pyselect"
 keywords = ["Machine learning", "Variable selection"]
-authors = ["Mateus Otto <mateus.potto@usp.br>"]
+authors = []
 
 [tool.poetry.dependencies]
 python = ">=3.8,<4.0"
-torch = "^1.8.1"
 numpy = "^1.22.2"
-omegaconf = "^2.1.1"
-hydra-core = "^1.1.1"
-pytorch-ignite = "^0.4.8"
 ipykernel = "^5.5.5"
 jupyterlab = "^3.2.8"
 ipywidgets = "^7.6.5"
 jupyter = "^1.0.0"
 matplotlib = "^3.4.2"
-sklearn = "^0.0"
 pandas = "^1.4.0"
 optuna = "^2.9.1"
+xgboost = "^1.5.2"
+nltk = "^3.7"
+scikit-learn = "^1.1.1"
+libsvmdata = "^0.4.1"
+scalene = "^1.5.13"
+torch = "1.12.0"
 
 [tool.poetry.dev-dependencies]
+
 pytest = "^6.2.4"
 coverage = { extras = ["toml"], version = "^5.5" }
 pytest-cov = "^2.12.0"
@@ -39,7 +39,7 @@ flake8-docstrings = "^1.6.0"
 black = "^21.7b0"
 darglint = "^1.8.0"
 psutil = "^5.8.0"
-
+sympy = "^1.10.1"
 [build-system]
 requires = ["poetry-core>=1.0.0"]
 build-backend = "poetry.core.masonry.api"
