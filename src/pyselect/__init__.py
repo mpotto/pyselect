@@ -2,4 +2,4 @@
 """The pyselect package."""
 __version__ = "0.1.0"
 
-from estimators import RFFNetRegressor, RFFNetClassifier, ReluRFFNetRegressor
+from pyselect.estimators import ReluRFFNetRegressor, RFFNetClassifier, RFFNetRegressor
