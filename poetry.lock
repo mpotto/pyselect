@@ -232,14 +232,6 @@ PyYAML = ">=3.12"
 stevedore = ">=2.0.1"
 
 [[package]]
-name = "cloudpickle"
-version = "2.2.0"
-description = "Extended pickling support for Python objects"
-category = "main"
-optional = false
-python-versions = ">=3.6"
-
-[[package]]
 name = "cmaes"
 version = "0.8.2"
 description = "Lightweight Covariance Matrix Adaptation Evolution Strategy (CMA-ES) implementation for Python 3."
@@ -290,17 +282,6 @@ colorama = {version = "*", markers = "sys_platform == \"win32\""}
 
 [package.extras]
 development = ["black", "flake8", "mypy", "pytest", "types-colorama"]
-
-[[package]]
-name = "commonmark"
-version = "0.9.1"
-description = "Python parser for the CommonMark Markdown spec"
-category = "main"
-optional = false
-python-versions = "*"
-
-[package.extras]
-test = ["flake8 (==3.7.8)", "hypothesis (==3.55.3)"]
 
 [[package]]
 name = "coverage"
@@ -925,6 +906,17 @@ optional = false
 python-versions = "*"
 
 [[package]]
+name = "memory-profiler"
+version = "0.60.0"
+description = "A module for monitoring memory usage of a python program"
+category = "dev"
+optional = false
+python-versions = ">=3.4"
+
+[package.dependencies]
+psutil = "*"
+
+[[package]]
 name = "mistune"
 version = "0.8.4"
 description = "The fastest markdown parser in pure Python"
@@ -1115,6 +1107,38 @@ description = "NumPy is the fundamental package for array computing with Python.
 category = "main"
 optional = false
 python-versions = ">=3.8"
+
+[[package]]
+name = "nvidia-cublas-cu11"
+version = "11.10.3.66"
+description = "CUBLAS native runtime libraries"
+category = "main"
+optional = false
+python-versions = ">=3"
+
+[[package]]
+name = "nvidia-cuda-nvrtc-cu11"
+version = "11.7.99"
+description = "NVRTC native runtime libraries"
+category = "main"
+optional = false
+python-versions = ">=3"
+
+[[package]]
+name = "nvidia-cuda-runtime-cu11"
+version = "11.7.99"
+description = "CUDA Runtime native Libraries"
+category = "main"
+optional = false
+python-versions = ">=3"
+
+[[package]]
+name = "nvidia-cudnn-cu11"
+version = "8.5.0.96"
+description = "cuDNN runtime libraries"
+category = "main"
+optional = false
+python-versions = ">=3"
 
 [[package]]
 name = "optuna"
@@ -1388,14 +1412,6 @@ optional = false
 python-versions = ">=3.5"
 
 [[package]]
-name = "pynvml"
-version = "11.4.1"
-description = "Python Bindings for the NVIDIA Management Library"
-category = "main"
-optional = false
-python-versions = ">=3.6"
-
-[[package]]
 name = "pyparsing"
 version = "3.0.7"
 description = "Python parsing module"
@@ -1597,35 +1613,6 @@ urllib3 = ">=1.21.1,<1.27"
 [package.extras]
 socks = ["PySocks (>=1.5.6,!=1.5.7)", "win-inet-pton"]
 use_chardet_on_py3 = ["chardet (>=3.0.2,<5)"]
-
-[[package]]
-name = "rich"
-version = "12.6.0"
-description = "Render rich text, tables, progress bars, syntax highlighting, markdown and more to the terminal"
-category = "main"
-optional = false
-python-versions = ">=3.6.3,<4.0.0"
-
-[package.dependencies]
-commonmark = ">=0.9.0,<0.10.0"
-pygments = ">=2.6.0,<3.0.0"
-typing-extensions = {version = ">=4.0.0,<5.0", markers = "python_version < \"3.9\""}
-
-[package.extras]
-jupyter = ["ipywidgets (>=7.5.1,<8.0.0)"]
-
-[[package]]
-name = "scalene"
-version = "1.5.13"
-description = "Scalene: A high-resolution, low-overhead CPU, GPU, and memory profiler for Python"
-category = "main"
-optional = false
-python-versions = ">=3.8"
-
-[package.dependencies]
-cloudpickle = ">=1.5.0"
-pynvml = ">=11.0.0"
-rich = ">=9.2.0"
 
 [[package]]
 name = "scikit-learn"
@@ -1834,14 +1821,21 @@ python-versions = ">=3.6"
 
 [[package]]
 name = "torch"
-version = "1.12.0"
+version = "1.13.0"
 description = "Tensors and Dynamic neural networks in Python with strong GPU acceleration"
 category = "main"
 optional = false
 python-versions = ">=3.7.0"
 
 [package.dependencies]
+nvidia-cublas-cu11 = "11.10.3.66"
+nvidia-cuda-nvrtc-cu11 = "11.7.99"
+nvidia-cuda-runtime-cu11 = "11.7.99"
+nvidia-cudnn-cu11 = "8.5.0.96"
 typing-extensions = "*"
+
+[package.extras]
+opt-einsum = ["opt-einsum (>=3.3)"]
 
 [[package]]
 name = "tornado"
@@ -1973,7 +1967,7 @@ testing = ["pytest (>=6)", "pytest-checkdocs (>=2.4)", "pytest-flake8", "pytest-
 [metadata]
 lock-version = "1.1"
 python-versions = ">=3.8,<4.0"
-content-hash = "c7ed80ce41e3c1705971ecbe1299c2a34c36f16ab620aac1704902db6a4fc35f"
+content-hash = "a0da18c6f6b2a47b960c807fe33796873828393568017805fb0cab0a05bb4f34"
 
 [metadata.files]
 alembic = [
@@ -2115,7 +2109,6 @@ cliff = [
     {file = "cliff-3.10.1-py3-none-any.whl", hash = "sha256:a21da482714b9f0b0e9bafaaf2f6a8b3b14161bb47f62e10e28d2fe4ff4b1626"},
     {file = "cliff-3.10.1.tar.gz", hash = "sha256:045aee3f3c64471965d7ad507ce8474a4e2f20815fbb5405a770f8596a2a00a0"},
 ]
-cloudpickle = []
 cmaes = [
     {file = "cmaes-0.8.2-py3-none-any.whl", hash = "sha256:9c4127be8942da3ac6857a7564d18a4a655462d77aa2d551a8e88063b23e0699"},
     {file = "cmaes-0.8.2.tar.gz", hash = "sha256:1c04ba23ded925ef13b96f42cfbd667a905ea5b80754c750e6448b9fcda96a5d"},
@@ -2131,10 +2124,6 @@ colorama = [
 colorlog = [
     {file = "colorlog-6.6.0-py2.py3-none-any.whl", hash = "sha256:351c51e866c86c3217f08e4b067a7974a678be78f07f85fc2d55b8babde6d94e"},
     {file = "colorlog-6.6.0.tar.gz", hash = "sha256:344f73204009e4c83c5b6beb00b3c45dc70fcdae3c80db919e0a4171d006fde8"},
-]
-commonmark = [
-    {file = "commonmark-0.9.1-py2.py3-none-any.whl", hash = "sha256:da2f38c92590f83de410ba1a3cbceafbc74fee9def35f9251ba9a971d6d66fd9"},
-    {file = "commonmark-0.9.1.tar.gz", hash = "sha256:452f9dc859be7f06631ddcb328b6919c67984aca654e5fefb3914d54691aed60"},
 ]
 coverage = [
     {file = "coverage-5.5-cp27-cp27m-macosx_10_9_x86_64.whl", hash = "sha256:b6d534e4b2ab35c9f93f46229363e17f63c53ad01330df9f2d6bd1187e5eaacf"},
@@ -2533,6 +2522,7 @@ mccabe = [
     {file = "mccabe-0.6.1-py2.py3-none-any.whl", hash = "sha256:ab8a6258860da4b6677da4bd2fe5dc2c659cff31b3ee4f7f5d64e79735b80d42"},
     {file = "mccabe-0.6.1.tar.gz", hash = "sha256:dd8d182285a0fe56bace7f45b5e7d1a6ebcbf524e8f3bd87eb0f125271b8831f"},
 ]
+memory-profiler = []
 mistune = [
     {file = "mistune-0.8.4-py2.py3-none-any.whl", hash = "sha256:88a1051873018da288eee8538d476dffe1262495144b33ecb586c4ab266bb8d4"},
     {file = "mistune-0.8.4.tar.gz", hash = "sha256:59a3429db53c50b5c6bcc8a07f8848cb00d7dc8bdb431a4ab41920d201d4756e"},
@@ -2595,6 +2585,10 @@ numpy = [
     {file = "numpy-1.22.3-pp38-pypy38_pp73-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:c34ea7e9d13a70bf2ab64a2532fe149a9aced424cd05a2c4ba662fd989e3e45f"},
     {file = "numpy-1.22.3.zip", hash = "sha256:dbc7601a3b7472d559dc7b933b18b4b66f9aa7452c120e87dfb33d02008c8a18"},
 ]
+nvidia-cublas-cu11 = []
+nvidia-cuda-nvrtc-cu11 = []
+nvidia-cuda-runtime-cu11 = []
+nvidia-cudnn-cu11 = []
 optuna = [
     {file = "optuna-2.10.0-py3-none-any.whl", hash = "sha256:457ff8b12b459dc1eeb0178389ff9e5c4da41764cc91152fe324bfd56f88d43f"},
     {file = "optuna-2.10.0.tar.gz", hash = "sha256:04c3100a4fe88a71dc72f69d8a10ec9db7c9a0c884feaf932b68632b00686a8d"},
@@ -2773,7 +2767,6 @@ pygments = [
     {file = "Pygments-2.11.2-py3-none-any.whl", hash = "sha256:44238f1b60a76d78fc8ca0528ee429702aae011c265fe6a8dd8b63049ae41c65"},
     {file = "Pygments-2.11.2.tar.gz", hash = "sha256:4e426f72023d88d03b2fa258de560726ce890ff3b630f88c21cbb8b2503b8c6a"},
 ]
-pynvml = []
 pyparsing = [
     {file = "pyparsing-3.0.7-py3-none-any.whl", hash = "sha256:a6c06a88f252e6c322f65faf8f418b16213b51bdfaece0524c1c1bc30c63c484"},
     {file = "pyparsing-3.0.7.tar.gz", hash = "sha256:18ee9022775d270c55187733956460083db60b37d0d0fb357445f3094eed3eea"},
@@ -3022,8 +3015,6 @@ requests = [
     {file = "requests-2.27.1-py2.py3-none-any.whl", hash = "sha256:f22fa1e554c9ddfd16e6e41ac79759e17be9e492b3587efa038054674760e72d"},
     {file = "requests-2.27.1.tar.gz", hash = "sha256:68d7c56fd5a8999887728ef304a6d12edc7be74f1cfa47714fc8b414525c9a61"},
 ]
-rich = []
-scalene = []
 scikit-learn = [
     {file = "scikit-learn-1.1.1.tar.gz", hash = "sha256:3e77b71e8e644f86c8b5be7f1c285ef597de4c384961389ee3e9ca36c445b256"},
     {file = "scikit_learn-1.1.1-cp310-cp310-macosx_10_13_x86_64.whl", hash = "sha256:102f51797cd8944bf44a038d106848ddf2804f2c1edf7aea45fba81a4fdc4d80"},
