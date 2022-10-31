@@ -7,8 +7,8 @@ from sklearn.metrics import mean_squared_error
 from sklearn.model_selection import GridSearchCV, train_test_split
 from sklearn.preprocessing import StandardScaler
 
-from src.pyselect import RFFNetRegressor
-from src.pyselect.datasets import make_jordan_se1
+from pyselect import RFFNetRegressor
+from pyselect.datasets import make_jordan_se1
 
 # 1) Generate seeds
 # torch
