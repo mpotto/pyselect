@@ -1,8 +1,8 @@
 import joblib
 
 import numpy as np
-import pandas as pd
 import torch
+import pandas as pd
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler
 
@@ -10,7 +10,7 @@ from gregorova import srf_run
 from pyselect.utils import get_mse_confidence_interval, get_folder
 
 test_size = 10 ** 3
-train_size = 11 * 10 ** 3
+train_size = 6 * 10 ** 3
 val_size = 10 ** 3
 
 metrics = []
@@ -22,9 +22,9 @@ seed = seed_sequence.generate_state(1)[0]
 torch.manual_seed(seed)
 
 # Dataset
-data = pd.read_csv("data/processed/ailerons.csv")
-X = data.drop(["target"], axis=1).to_numpy()
-y = data[["target"]].to_numpy()
+data = pd.read_csv("data/processed/cpusmall.csv")
+X = data.drop(["target"], axis=1)
+y = np.ravel(data[["target"]])
 
 X_train_val, X_test, y_train_val, y_test = train_test_split(
     X, y, train_size=train_size + val_size, test_size=test_size, random_state=0
@@ -50,7 +50,7 @@ train, valid, test = srf_run(X_train, y_train, X_val, y_val, X_test, y_test)
 
 elapsed_times = np.array([train[i]["time"] / 1e3 for i in range(len(train))])
 mean_elapsed_time = np.mean(elapsed_times)
-print("Mean elapsed time for SRF: {:2f}".format(mean_elapsed_time))
+print("Mean elapsed time for SRFF: {:2f}".format(mean_elapsed_time))
 
 srf_pred = test["preds"].numpy()
 center, band = get_mse_confidence_interval(y_test.numpy(), srf_pred)
@@ -59,9 +59,9 @@ metrics.append([center, band, mean_elapsed_time])
 precisions = test["gamma"].detach().numpy()
 
 # Save results
-relevances_folder = get_folder("eval/benchmarks/srff/ailerons/precisions")
-metrics_folder = get_folder("eval/benchmarks/srff/ailerons/metrics")
-models_folder = get_folder("eval/benchmarks/rffnet/ailerons/models")
+relevances_folder = get_folder("eval/benchmarks/srff/cpusmall/precisions")
+metrics_folder = get_folder("eval/benchmarks/srff/cpusmall/metrics")
+models_folder = get_folder("eval/benchmarks/srff/cpusmall/models")
 
 np.savetxt(f"{relevances_folder}/precisions.txt", precisions)
 np.savetxt(f"{metrics_folder}/metrics.txt", metrics)

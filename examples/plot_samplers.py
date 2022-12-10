@@ -47,7 +47,7 @@ samplers = [
 for name, sampler in zip(["Normal", "Cauchy", "Laplace"], samplers):
     reg_rff = RFFNetRegressor(
         lr=5e-4,
-        alpha=1e-4,
+        alpha=0,
         verbose=True,
         log_rate=20,
         torch_seed=seed,
@@ -67,7 +67,7 @@ for name, sampler in zip(["Normal", "Cauchy", "Laplace"], samplers):
 
     plt.figure()
     plt.title(name)
-    plt.stem(np.abs(reg_rff.model.get_bandwidths()))
+    plt.stem(np.abs(reg_rff.model.get_precisions()))
     plt.ylabel(r"$\beta$")
 
 plt.tight_layout()

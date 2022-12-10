@@ -3,7 +3,9 @@ import joblib
 
 import numpy as np
 import optuna
-from sklearn.linear_model import LogisticRegression
+import xgboost as xgb
+from matplotlib import pyplot as plt
+from sklearn.model_selection import train_test_split
 from sklearn.metrics import accuracy_score, f1_score, roc_auc_score
 from sklearn.utils import resample
 
@@ -26,10 +28,21 @@ X_sub, y_sub = resample(
 
 
 def objective(trial):
-    C = trial.suggest_float("C", 1e-7, 1e2, log=True)
+    max_depth = trial.suggest_int("max_depth", 3, 20)
+    eta = trial.suggest_float("eta", 0, 1)
+    gamma = trial.suggest_float("gamma", 1e-5, 100, log=True)
+    min_child_weight = trial.suggest_float("min_child_weight", 0, 10)
 
     # Model
-    model = LogisticRegression(C=C, penalty="l1", solver="liblinear")
+    model = xgb.XGBClassifier(
+        objective="binary:logistic",
+        eval_metric="logloss",
+        use_label_encoder=False,
+        max_depth=max_depth,
+        eta=eta,
+        gamma=gamma,
+        min_child_weight=min_child_weight,
+    )
 
     model.fit(X_sub, y_sub)
 
@@ -42,12 +55,10 @@ def objective(trial):
     return roc_auc
 
 
-search_space = {"C": [1e-5, 1e-4, 1e-3, 1e-2, 1e-1, 1, 10, 100]}
-
 study = optuna.create_study(
-    sampler=optuna.samplers.GridSampler(search_space), direction="maximize"
+    sampler=optuna.samplers.RandomSampler(), direction="maximize"
 )
-study.optimize(objective, callbacks=[best_model_callback])
+study.optimize(objective, callbacks=[best_model_callback], n_trials=50)
 
 best_model = study.user_attrs["best_model"]
 
@@ -65,9 +76,13 @@ roc_auc = roc_auc_score(y_test, model_proba[:, -1])
 
 metrics.append([acc, f1, roc_auc, elapsed_time])
 
-# Results
-metrics_folder = get_folder("eval/benchmarks/logistic-l1/amazon/metrics")
-models_folder = get_folder("eval/benchmarks/logistic-l1/amazon/models")
+importances = best_model.feature_importances_
 
+# Results
+precisions_folder = get_folder("eval/benchmarks/xgb/amazon/precisions")
+metrics_folder = get_folder("eval/benchmarks/xgb/amazon/metrics")
+models_folder = get_folder("eval/benchmarks/xgb/amazon/models")
+
+np.savetxt(f"{precisions_folder}/precisions.txt", importances)
 np.savetxt(f"{metrics_folder}/metrics.txt", metrics)
 joblib.dump(best_model, f"{models_folder}/model.joblib")

@@ -2,7 +2,6 @@ from abc import ABCMeta, abstractmethod, abstractstaticmethod
 
 import numpy as np
 import torch
-
 from sklearn.base import (
     BaseEstimator,
     ClassifierMixin,
@@ -11,8 +10,8 @@ from sklearn.base import (
 )
 from sklearn.utils.validation import check_is_fitted
 
-from pyselect.model import RFFNet, ReluRFFNet
-from pyselect.solvers import palm_solver, adam_solver
+from pyselect.model import ReluRFFNet, RFFNet
+from pyselect.solvers import adam_solver, palm_solver
 
 
 class BaseRFFNet(BaseEstimator, metaclass=ABCMeta):
@@ -27,6 +26,7 @@ class BaseRFFNet(BaseEstimator, metaclass=ABCMeta):
         lr=5e-4,
         max_iter=200,
         early_stopping=True,
+        min_delta_fraction=1.0,
         validation_fraction=0.1,
         n_iter_no_change=20,
         device="cpu",
@@ -49,6 +49,7 @@ class BaseRFFNet(BaseEstimator, metaclass=ABCMeta):
         self.early_stopping = early_stopping
         self.n_iter_no_change = n_iter_no_change
         self.validation_fraction = validation_fraction
+        self.min_delta_fraction = min_delta_fraction
 
         self.device = device
 
@@ -110,6 +111,7 @@ class BaseRFFNet(BaseEstimator, metaclass=ABCMeta):
             batch_size=self.batch_size,
             max_iter=self.max_iter,
             early_stopping=self.early_stopping,
+            min_delta_fraction=self.min_delta_fraction,
             n_iter_no_change=self.n_iter_no_change,
             validation_fraction=self.validation_fraction,
             random_state=self.random_state,
@@ -179,63 +181,3 @@ class RFFNetClassifier(ClassifierMixin, BaseRFFNet):
         if isinstance(X, np.ndarray):
             ans = ans.cpu().numpy()
         return ans
-
-
-class ReluRFFNetRegressor(RegressorMixin, MultiOutputMixin, BaseRFFNet):
-
-    criterion = torch.nn.MSELoss()
-
-    def _convert_y(self, y):
-        y = torch.FloatTensor(y).to(self.device)
-        if len(y.shape) == 1:
-            y = y.view(-1, 1)
-        return y
-
-    @staticmethod
-    def _output_shape(y):
-        return y.shape[1]
-
-    def _init_model(self, X, y):
-        if self.torch_seed is not None:
-            torch.manual_seed(self.torch_seed)
-
-        output_shape = self._output_shape(y)
-
-        self.model = ReluRFFNet(
-            [X.shape[1], *self.hidden_layer_size, output_shape],
-            sampler=self.sampler,
-            dropout=self.dropout,
-        ).to(self.device)
-
-    def predict(self, X):
-        with torch.no_grad():
-            ans = self.model(self._cast_input(X))
-        if isinstance(X, np.ndarray):
-            ans = ans.cpu().numpy()
-        return ans
-
-    def fit(self, X, y):
-        self._init_model(X, y)
-        X, y = self._cast_input(X, y)
-
-        self.model = adam_solver(
-            X,
-            y,
-            self.model,
-            self.criterion,
-            lr=self.lr,
-            batch_size=self.batch_size,
-            max_iter=self.max_iter,
-            early_stopping=self.early_stopping,
-            n_iter_no_change=self.n_iter_no_change,
-            validation_fraction=self.validation_fraction,
-            random_state=self.random_state,
-            verbose=self.verbose,
-            log_rate=self.log_rate,
-        )
-
-        self.model.eval()
-
-        self.precisions_ = self.model.get_precisions()
-
-        return self

@@ -139,4 +139,7 @@ package.json
 # Remove data
 data/**
 data/
-!**/config/data
+!**/config/data 
+eval/**
+eval/
+

@@ -3,33 +3,32 @@ import joblib
 
 import numpy as np
 import optuna
-from matplotlib import pyplot as plt
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import mean_squared_error
 from sklearn.preprocessing import StandardScaler
 
 from pyselect.estimators import RFFNetRegressor
 from pyselect.datasets import make_gregorova_se1
-from pyselect.utils import best_model_callback, get_mse_confidence_interval
+from pyselect.utils import best_model_callback, get_mse_confidence_interval, get_folder
 
 seed_sequence = np.random.SeedSequence(entropy=0)
 seed = seed_sequence.generate_state(1)[0]
-rng = np.random.RandomState(0)
-
-results = []
 
 n_samples = 54 * 10 ** 3
+train_size = 50 * 10 ** 3
 test_size = 2 * 10 ** 3
 val_size = 2 * 10 ** 3
 
+metrics = []
+
 # 2) Generate data
-X, y = make_gregorova_se1(n_samples, random_state=rng)
+X, y = make_gregorova_se1(n_samples, random_state=0)
 
 X_train_val, X_test, y_train_val, y_test = train_test_split(
-    X, y, test_size=test_size, random_state=rng
+    X, y, test_size=test_size, random_state=0
 )
 X_train, X_val, y_train, y_val = train_test_split(
-    X_train_val, y_train_val, test_size=val_size, random_state=rng
+    X_train_val, y_train_val, test_size=val_size, random_state=0
 )
 
 scaler = StandardScaler()
@@ -48,8 +47,9 @@ def objective(trial):
         alpha=alpha,
         validation_fraction=0.1,
         n_iter_no_change=10,
+        batch_size=train_size // 10,
         torch_seed=seed,
-        random_state=rng,
+        random_state=0,
     )
 
     t_start = time.time()
@@ -60,7 +60,7 @@ def objective(trial):
 
     mse = mean_squared_error(y_val, model_pred)
     trial.set_user_attr("model", value=model)
-    trial.set_user_attr("fitting_time", value=elapsed_time)
+    trial.set_user_attr("elapsed_time", value=elapsed_time)
 
     return mse
 
@@ -76,24 +76,17 @@ study.optimize(objective, callbacks=[best_model_callback])
 best_model = study.user_attrs["best_model"]
 
 best_model_pred = best_model.predict(X_test)
+
 center, band = get_mse_confidence_interval(y_test, best_model_pred)
-results.append([center, band, study.best_trial.user_attrs["fitting_time"]])
+metrics.append([center, band, study.best_trial.user_attrs["elapsed_time"]])
 
-# Save unscaled precisions.
-np.savetxt(
-    "experiments/gregorova/se1/results/rffnet_precisions.txt",
-    best_model.precisions_,
-)
-joblib.dump(best_model, "experiments/gregorova/se1/models/reg_rff.joblib")
+precisions = best_model.precisions_
 
-# 7) Plot RFF unscaled precisions
-labels = np.arange(0, X.shape[1])
-plt.figure()
-plt.stem(np.abs(best_model.precisions_))
-plt.ylabel(r"$\lambda$")
-plt.xticks(labels, labels + 1)
+# Save results
+relevances_folder = get_folder("eval/benchmarks/rffnet/se1/precisions")
+metrics_folder = get_folder("eval/benchmarks/rffnet/se1/metrics")
+models_folder = get_folder("eval/benchmarks/rffnet/se1/models")
 
-plt.tight_layout()
-plt.show()
-
-np.savetxt("experiments/gregorova/se1/results/rffnet.txt", np.array(results))
+np.savetxt(f"{relevances_folder}/precisions.txt", precisions)
+np.savetxt(f"{metrics_folder}/metrics.txt", metrics)
+joblib.dump(best_model, f"{models_folder}/model.joblib")

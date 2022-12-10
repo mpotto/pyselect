@@ -1,5 +1,4 @@
 import joblib
-from matplotlib import pyplot as plt
 
 import numpy as np
 import torch
@@ -7,14 +6,14 @@ from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler
 
 from gregorova import srf_run
-from pyselect.utils import get_mse_confidence_interval
+from pyselect.utils import get_mse_confidence_interval, get_folder
 from pyselect.datasets import make_gregorova_se1
 
 n_samples = 54 * 10 ** 3
 test_size = 2 * 10 ** 3
 val_size = 2 * 10 ** 3
 
-results = []
+metrics = []
 
 # 1) Generate seeds
 # torch
@@ -22,18 +21,15 @@ seed_sequence = np.random.SeedSequence(entropy=0)
 seed = seed_sequence.generate_state(1)[0]
 torch.manual_seed(seed)
 
-# sklearn
-rng = np.random.RandomState(0)
-
 # 2) Generate data
-X, y = make_gregorova_se1(n_samples, random_state=rng)
+X, y = make_gregorova_se1(n_samples, random_state=0)
 
 X_train_val, X_test, y_train_val, y_test = train_test_split(
-    X, y, test_size=test_size, random_state=rng
+    X, y, test_size=test_size, random_state=0
 )
 
 X_train, X_val, y_train, y_val = train_test_split(
-    X_train_val, y_train_val, test_size=val_size, random_state=rng
+    X_train_val, y_train_val, test_size=val_size, random_state=0
 )
 
 scaler = StandardScaler()
@@ -57,22 +53,15 @@ print("Mean elapsed time for SRF: {:2f}".format(mean_elapsed_time))
 
 srf_pred = test["preds"].numpy()
 center, band = get_mse_confidence_interval(y_test.numpy(), srf_pred)
-results.append([center, band, mean_elapsed_time])
+metrics.append([center, band, mean_elapsed_time])
 
 precisions = test["gamma"].detach().numpy()
 
-np.savetxt(f"experiments/gregorova/se1/results/srff_precisions.txt", precisions)
-joblib.dump(test, f"experiments/gregorova/se1/models/reg_srff.joblib")
+# Save results
+relevances_folder = get_folder("eval/benchmarks/srff/se1/precisions")
+metrics_folder = get_folder("eval/benchmarks/srff/se1/metrics")
+models_folder = get_folder("eval/benchmarks/rffnet/se1/models")
 
-# 7) Plot RFF bandwidths
-labels = np.arange(0, X.shape[1])
-plt.figure()
-plt.stem(precisions)
-plt.ylabel(r"$\lambda$")
-plt.xticks(labels, labels + 1)
-
-plt.tight_layout()
-plt.show()
-
-# 8) Save results.
-np.savetxt("experiments/gregorova/se1/results/srff.txt", results)
+np.savetxt(f"{relevances_folder}/precisions.txt", precisions)
+np.savetxt(f"{metrics_folder}/metrics.txt", metrics)
+joblib.dump(test, f"{models_folder}/model.joblib")

@@ -12,12 +12,12 @@ from pyselect.utils import best_model_callback, get_folder
 metrics = []
 
 # Dataset
-X_train = np.load("data/splitted/amazon/X_train.npy")
-X_val = np.load("data/splitted/amazon/X_val.npy")
-X_test = np.load("data/splitted/amazon/X_test.npy")
-y_train = np.load("data/splitted/amazon/y_train.npy")
-y_val = np.load("data/splitted/amazon/y_val.npy")
-y_test = np.load("data/splitted/amazon/y_test.npy")
+X_train = np.load("data/splitted/higgs/X_train.npy")
+X_val = np.load("data/splitted/higgs/X_val.npy")
+X_test = np.load("data/splitted/higgs/X_test.npy")
+y_train = np.load("data/splitted/higgs/y_train.npy")
+y_val = np.load("data/splitted/higgs/y_val.npy")
+y_test = np.load("data/splitted/higgs/y_test.npy")
 
 # Subsample for finding best parameters
 X_sub, y_sub = resample(
@@ -66,8 +66,8 @@ roc_auc = roc_auc_score(y_test, model_proba[:, -1])
 metrics.append([acc, f1, roc_auc, elapsed_time])
 
 # Results
-metrics_folder = get_folder("eval/benchmarks/logistic-l1/amazon/metrics")
-models_folder = get_folder("eval/benchmarks/logistic-l1/amazon/models")
+metrics_folder = get_folder("eval/benchmarks/logistic-l1/higgs/metrics")
+models_folder = get_folder("eval/benchmarks/logistic-l1/higgs/models")
 
 np.savetxt(f"{metrics_folder}/metrics.txt", metrics)
 joblib.dump(best_model, f"{models_folder}/model.joblib")

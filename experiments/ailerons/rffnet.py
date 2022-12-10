@@ -1,45 +1,35 @@
-import os
 import time
 import joblib
 
 import numpy as np
 import optuna
-import matplotlib.pyplot as plt
+import pandas as pd
 from sklearn.preprocessing import StandardScaler
-from sklearn.kernel_ridge import KernelRidge
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import mean_squared_error
 
 from pyselect import RFFNetRegressor
-from pyselect.utils import best_model_callback, get_mse_confidence_interval
+from pyselect.utils import best_model_callback, get_mse_confidence_interval, get_folder
 
 test_size = 10 ** 3
 train_size = 11 * 10 ** 3
 val_size = 10 ** 3
 
-results = []
+metrics = []
 
 seed_sequence = np.random.SeedSequence(entropy=0)
 seed = seed_sequence.generate_state(1)[0]
-rng = np.random.RandomState(0)
 
 # Dataset
-filename_train = os.path.join("data/ailerons/Ailerons", "ailerons.data")
-filename_test = os.path.join("data/ailerons/Ailerons", "ailerons.test")
-
-data_train = np.loadtxt(filename_train, delimiter=",")
-data_test = np.loadtxt(filename_test, delimiter=",")
-
-data = np.vstack((data_train, data_test))
-
-X, y = data[:, 0:40], data[:, 40].reshape(-1, 1)
+data = pd.read_csv("data/processed/ailerons.csv")
+X = data.drop(["target"], axis=1).to_numpy()
+y = data[["target"]].to_numpy()
 
 X_train_val, X_test, y_train_val, y_test = train_test_split(
-    X, y, train_size=train_size + val_size, test_size=test_size, random_state=rng
+    X, y, train_size=train_size + val_size, test_size=test_size, random_state=0
 )
-
 X_train, X_val, y_train, y_val = train_test_split(
-    X_train_val, y_train_val, test_size=val_size, random_state=rng
+    X_train_val, y_train_val, test_size=val_size, random_state=0
 )
 
 scaler = StandardScaler()
@@ -56,10 +46,11 @@ def objective(trial):
     model = RFFNetRegressor(
         lr=lr,
         alpha=alpha,
+        batch_size=train_size // 10,
         validation_fraction=0.1,
-        n_iter_no_change=30,
+        n_iter_no_change=20,
         torch_seed=seed,
-        random_state=rng,
+        random_state=0,
     )
 
     t_start = time.time()
@@ -76,8 +67,8 @@ def objective(trial):
 
 
 search_space = {
-    "lr": [1e-5, 1e-4, 1e-3, 1e-2],
-    "alpha": [1e-7, 1e-6, 1e-5, 1e-4, 1e-3, 1e-2, 1e-1],
+    "lr": [1e-4, 1e-3, 1e-2],
+    "alpha": [1e-7, 1e-6, 1e-5, 1e-4, 1e-3, 1e-2, 1e-1, 1],
 }
 
 study = optuna.create_study(sampler=optuna.samplers.GridSampler(search_space))
@@ -86,21 +77,17 @@ study.optimize(objective, callbacks=[best_model_callback])
 best_model = study.user_attrs["best_model"]
 
 best_model_pred = best_model.predict(X_test)
+
 center, band = get_mse_confidence_interval(y_test, best_model_pred)
-results.append([center, band, study.best_trial.user_attrs["fitting_time"]])
+metrics.append([center, band, study.best_trial.user_attrs["fitting_time"]])
 
-# 7) Plot RFF precisions
-labels = np.arange(0, X.shape[1])
-plt.figure()
-plt.stem(np.abs(best_model.precisions_))
-plt.ylabel(r"$\lambda$")
-plt.xticks(labels[::2], labels[::2] + 1)
+# Save results
+relevances_folder = get_folder("eval/benchmarks/rffnet/ailerons/precisions")
+metrics_folder = get_folder("eval/benchmarks/rffnet/ailerons/metrics")
+models_folder = get_folder("eval/benchmarks/rffnet/ailerons/models")
 
-plt.tight_layout()
-plt.show()
+precisions = best_model.precisions_
 
-# 8) Save results.
-
-np.savetxt("experiments/ailerons/results/rffnet_results.txt", np.array(results))
-np.savetxt("experiments/ailerons/results/rffnet_precisions.txt", best_model.precisions_)
-joblib.dump(best_model, "experiments/ailerons/models/reg_rff.joblib")
+np.savetxt(f"{relevances_folder}/precisions.txt", precisions)
+np.savetxt(f"{metrics_folder}/metrics.txt", metrics)
+joblib.dump(best_model, f"{models_folder}/model.joblib")

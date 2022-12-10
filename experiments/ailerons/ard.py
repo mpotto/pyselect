@@ -1,42 +1,32 @@
-import os
 import time
 import joblib
 
 import numpy as np
 import optuna
-import matplotlib.pyplot as plt
+import pandas as pd
 from sklearn.preprocessing import StandardScaler
 from sklearn.linear_model import ARDRegression
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import mean_squared_error
 
-from pyselect.utils import best_model_callback, get_mse_confidence_interval
+from pyselect.utils import best_model_callback, get_mse_confidence_interval, get_folder
 
 test_size = 10 ** 3
 train_size = 11 * 10 ** 3
 val_size = 10 ** 3
 
-results = []
-
-rng = np.random.RandomState(0)
+metrics = []
 
 # Dataset
-filename_train = os.path.join("data/ailerons/Ailerons", "ailerons.data")
-filename_test = os.path.join("data/ailerons/Ailerons", "ailerons.test")
-
-data_train = np.loadtxt(filename_train, delimiter=",")
-data_test = np.loadtxt(filename_test, delimiter=",")
-
-data = np.vstack((data_train, data_test))
-
-X, y = data[:, 0:40], data[:, 40].reshape(-1, 1)
+data = pd.read_csv("data/processed/ailerons.csv")
+X = data.drop(["target"], axis=1)
+y = np.ravel(data[["target"]])
 
 X_train_val, X_test, y_train_val, y_test = train_test_split(
-    X, y, train_size=train_size + val_size, test_size=test_size, random_state=rng
+    X, y, train_size=train_size + val_size, test_size=test_size, random_state=0
 )
-
 X_train, X_val, y_train, y_val = train_test_split(
-    X_train_val, y_train_val, test_size=val_size, random_state=rng
+    X_train_val, y_train_val, test_size=val_size, random_state=0
 )
 
 scaler = StandardScaler()
@@ -65,7 +55,6 @@ def objective(trial):
     return mse
 
 
-# Model
 search_space = {
     "lambda_1": [1e-8, 1e-7, 1e-6, 1e-5, 1e-4],
     "lambda_2": [1e-8, 1e-7, 1e-6, 1e-5, 1e-4],
@@ -76,24 +65,18 @@ study.optimize(objective, callbacks=[best_model_callback])
 
 best_model = study.user_attrs["best_model"]
 
-ard_pred = best_model.predict(X_test)
-center, band = get_mse_confidence_interval(y_test, ard_pred)
-results.append([center, band, study.best_trial.user_attrs["elapsed_time"]])
+best_model_pred = best_model.predict(X_test)
 
-np.savetxt(
-    f"experiments/ailerons/results/ard_precisions.txt",
-    best_model.lambda_,
-)
+center, band = get_mse_confidence_interval(y_test, best_model_pred)
+metrics.append([center, band, study.best_trial.user_attrs["elapsed_time"]])
 
-labels = np.arange(0, X.shape[1])
-plt.figure()
-plt.stem(np.abs(best_model.lambda_))
-plt.ylabel(r"$\lambda$")
-plt.xticks(labels, labels + 1)
+precisions = 1 / best_model.lambda_
 
-plt.tight_layout()
-plt.show
+# Save results
+relevances_folder = get_folder("eval/benchmarks/ard/ailerons/precisions")
+metrics_folder = get_folder("eval/benchmarks/ard/ailerons/metrics")
+models_folder = get_folder("eval/benchmarks/ard/ailerons/models")
 
-# Save results.
-np.savetxt("experiments/ailerons/results/ard_results.txt", results)
-joblib.dump(best_model, "experiments/ailerons/models/reg_ard.joblib")
+np.savetxt(f"{relevances_folder}/precisions.txt", precisions)
+np.savetxt(f"{metrics_folder}/metrics.txt", metrics)
+joblib.dump(best_model, f"{models_folder}/model.joblib")

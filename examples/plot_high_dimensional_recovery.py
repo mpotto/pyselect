@@ -38,7 +38,7 @@ X_test = scaler.transform(X_test)
 # RFF (hand-tuned)
 reg_rff = RFFNetRegressor(
     lr=1e-3,
-    alpha=1e-2,
+    alpha=0e-2,
     batch_size=32,
     verbose=True,
     log_rate=1,

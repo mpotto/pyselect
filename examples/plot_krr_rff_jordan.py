@@ -19,7 +19,7 @@ seed = seed_sequence.generate_state(1)[0]
 rng = np.random.RandomState(0)
 
 # 2) Generate datasets
-n_samples, n_features, rho = 1000, 20, 0.1
+n_samples, n_features, rho = 1000, 20, 0.7
 X, y = make_jordan_se1(n_samples, n_features, rho, random_state=rng)
 
 # 3) Process data.
@@ -37,7 +37,7 @@ y_test = scaler.transform(y_test)
 # 4) Define models
 # RFF (hand-tuned)
 reg_rff = RFFNetRegressor(
-    alpha=1e-5,
+    alpha=0,
     lr=1e-4,
     batch_size=32,
     verbose=True,

@@ -1,18 +1,11 @@
 import numpy as np
 import torch
-
-from numpy.linalg import norm
 from sklearn.model_selection import train_test_split
 
 
 def prox_2_squared(x, alpha):
     "Proximal operator for l2 norm squared."
     return x / (1 + 2 * alpha)
-
-
-def ST_vec(x, u):
-    """Entrywise soft-thresholding of array x at level u."""
-    return np.sign(x) * np.maximum(0.0, np.abs(x) - u)
 
 
 def palm_solver(
@@ -23,9 +16,10 @@ def palm_solver(
     *,
     alpha=1e-4,
     lr=5e-4,
-    batch_size=32,
+    batch_size=100,
     max_iter=10 ** 3,
     early_stopping=True,
+    min_delta_fraction=1.0,
     n_iter_no_change=10,
     validation_fraction=0.1,
     random_state=None,
@@ -45,7 +39,6 @@ def palm_solver(
     train_size = len(X)
     for epoch in range(max_iter):
         indices = torch.randperm(train_size)
-
         model.train()
 
         for i in range(train_size // batch_size):
@@ -77,7 +70,7 @@ def palm_solver(
         with torch.no_grad():
             val_loss = criterion(model(X_val), y_val)
 
-        if val_loss < best_val_loss:
+        if val_loss < min_delta_fraction * best_val_loss:
             best_model_state_dict = model.state_dict()
             best_val_loss = val_loss
             no_improvement_count = 0

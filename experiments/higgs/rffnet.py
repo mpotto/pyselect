@@ -3,39 +3,29 @@ import joblib
 
 import numpy as np
 import optuna
-from matplotlib import pyplot as plt
-from sklearn.model_selection import train_test_split
 from sklearn.metrics import accuracy_score, f1_score, roc_auc_score
 from sklearn.utils import resample
 
 from pyselect.estimators import RFFNetClassifier
-from pyselect.utils import best_model_callback
+from pyselect.utils import best_model_callback, get_folder
 
-val_size = 5 * 10 ** 3
-
-results = []
-
-# 1) Generate seeds
-# torch
-seed_sequence = np.random.SeedSequence(entropy=0)
-seed = seed_sequence.generate_state(1)[0]
-
-# sklearn
-rng = np.random.RandomState(0)
+metrics = []
 
 # Dataset
-# Dataset
-X_train = np.load("data/higgs/processed/X_train.npy")
-X_val = np.load("data/higgs/processed/X_val.npy")
-X_test = np.load("data/higgs/processed/X_test.npy")
-y_train = np.load("data/higgs/processed/y_train.npy").astype(np.int32)
-y_val = np.load("data/higgs/processed/y_val.npy").astype(np.int32)
-y_test = np.load("data/higgs/processed/y_test.npy").astype(np.int32)
+X_train = np.load("data/splitted/higgs/X_train.npy")
+X_val = np.load("data/splitted/higgs/X_val.npy")
+X_test = np.load("data/splitted/higgs/X_test.npy")
+y_train = np.load("data/splitted/higgs/y_train.npy")
+y_val = np.load("data/splitted/higgs/y_val.npy")
+y_test = np.load("data/splitted/higgs/y_test.npy")
 
 # Subsample for finding best parameters
 X_sub, y_sub = resample(
-    X_train, y_train, n_samples=10 ** 4, stratify=y_train, random_state=rng
+    X_train, y_train, n_samples=10 ** 4, stratify=y_train, random_state=0
 )
+
+seed_sequence = np.random.SeedSequence(entropy=0)
+seed = seed_sequence.generate_state(1)[0]
 
 
 def objective(trial):
@@ -50,7 +40,7 @@ def objective(trial):
         n_iter_no_change=5,
         batch_size=32,
         torch_seed=seed,
-        random_state=rng,
+        random_state=0,
     )
 
     model.fit(X_sub, y_sub)
@@ -77,7 +67,9 @@ study.optimize(objective, callbacks=[best_model_callback])
 
 best_model = study.user_attrs["best_model"]
 best_model.verbose = True
-best_model.log_rate = 1
+best_model.log_rate = 5
+best_model.n_iter_no_change = 10
+best_model.batch_size = len(X_train) // 10
 
 t_start = time.time()
 best_model.fit(X_train, y_train)
@@ -91,19 +83,15 @@ acc = accuracy_score(y_test, model_pred)
 f1 = f1_score(y_test, model_pred)
 roc_auc = roc_auc_score(y_test, model_proba[:, -1])
 
-results.append([acc, f1, roc_auc, elapsed_time])
+precisions = best_model.precisions_
 
-# 7) Plot RFF bandwidths
-labels = np.arange(0, X_train.shape[1])
-plt.figure()
-plt.stem(np.abs(best_model.precisions_))
-plt.ylabel(r"$\sigma$")
-plt.xticks(labels[::1], labels[::1] + 1)
+metrics.append([acc, f1, roc_auc, elapsed_time])
 
-plt.tight_layout()
-plt.show()
+# Results
+precisions_folder = get_folder("eval/benchmarks/rffnet/higgs/precisions")
+metrics_folder = get_folder("eval/benchmarks/rffnet/higgs/metrics")
+models_folder = get_folder("eval/benchmarks/rffnet/higgs/models")
 
-# 8) Save results.
-np.savetxt("experiments/higgs/results/rffnet_results.txt", results)
-np.savetxt("experiments/higgs/results/rffnet_precisions.txt", best_model.precisions_)
-joblib.dump(best_model, "experiments/higgs/models/reg_rff.joblib")
+np.savetxt(f"{precisions_folder}/precisions.txt", precisions)
+np.savetxt(f"{metrics_folder}/metrics.txt", metrics)
+joblib.dump(best_model, f"{models_folder}/model.joblib")

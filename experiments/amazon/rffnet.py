@@ -9,49 +9,41 @@ from sklearn.metrics import accuracy_score, f1_score, roc_auc_score
 from sklearn.utils import resample
 
 from pyselect.estimators import RFFNetClassifier
-from pyselect.utils import best_model_callback
+from pyselect.utils import best_model_callback, get_folder
 
-val_size = 5 * 10 ** 3
-
-results = []
-
-# 1) Generate seeds
-# torch
-seed_sequence = np.random.SeedSequence(entropy=0)
-seed = seed_sequence.generate_state(1)[0]
-
-# sklearn
-rng = np.random.RandomState(0)
+metrics = []
 
 # Dataset
-X_train_val = np.load("data/amazon/processed2/X_train.npy")
-X_test = np.load("data/amazon/processed2/X_test.npy")
-y_train_val = np.load("data/amazon/processed2/y_train.npy")
-y_test = np.load("data/amazon/processed2/y_test.npy")
-
-X_train, X_val, y_train, y_val = train_test_split(
-    X_train_val, y_train_val, test_size=val_size, random_state=rng
-)
+X_train = np.load("data/splitted/amazon/X_train.npy")
+X_val = np.load("data/splitted/amazon/X_val.npy")
+X_test = np.load("data/splitted/amazon/X_test.npy")
+y_train = np.load("data/splitted/amazon/y_train.npy")
+y_val = np.load("data/splitted/amazon/y_val.npy")
+y_test = np.load("data/splitted/amazon/y_test.npy")
 
 # Subsample for finding best parameters
 X_sub, y_sub = resample(
-    X_train, y_train, n_samples=10 ** 4, stratify=y_train, random_state=rng
+    X_train, y_train, n_samples=10 ** 3, stratify=y_train, random_state=0
 )
+sub_size = X_sub.shape[0]
+
+seed_sequence = np.random.SeedSequence(entropy=0)
+seed = seed_sequence.generate_state(1)[0]
 
 
 def objective(trial):
-    lr = trial.suggest_float("lr", 1e-5, 1e-2, log=True)
-    alpha = trial.suggest_float("alpha", 1e-7, 1e-1, log=True)
+    lr = trial.suggest_float("lr", 1e-4, 1e-2, log=True)
+    alpha = trial.suggest_float("alpha", 1e-7, 1, log=True)
 
     # Model
     model = RFFNetClassifier(
         lr=lr,
         alpha=alpha,
         validation_fraction=0.1,
-        n_iter_no_change=5,
-        batch_size=32,
+        n_iter_no_change=10,
+        batch_size=sub_size // 10,
         torch_seed=seed,
-        random_state=rng,
+        random_state=0,
     )
 
     model.fit(X_sub, y_sub)
@@ -67,8 +59,8 @@ def objective(trial):
 
 # Model
 search_space = {
-    "lr": [1e-5, 1e-4, 1e-3, 1e-2],
-    "alpha": [1e-7, 1e-6, 1e-5, 1e-4, 1e-3, 1e-2, 1e-1],
+    "lr": [1e-4, 1e-3, 1e-2],
+    "alpha": [1e-6, 1e-5, 1e-4, 1e-3, 1e-2, 1e-1, 1],
 }
 
 study = optuna.create_study(
@@ -78,7 +70,9 @@ study.optimize(objective, callbacks=[best_model_callback])
 
 best_model = study.user_attrs["best_model"]
 best_model.verbose = True
-best_model.log_rate = 1
+best_model.log_rate = 5
+best_model.n_iter_no_change = 10
+best_model.batch_size = len(X_train) // 10
 
 t_start = time.time()
 best_model.fit(X_train, y_train)
@@ -92,19 +86,15 @@ acc = accuracy_score(y_test, model_pred)
 f1 = f1_score(y_test, model_pred)
 roc_auc = roc_auc_score(y_test, model_proba[:, -1])
 
-results.append([acc, f1, roc_auc, elapsed_time])
+precisions = best_model.precisions_
 
-# 7) Plot RFF bandwidths
-labels = np.arange(0, X_train.shape[1])
-plt.figure()
-plt.stem(np.abs(best_model.precisions_))
-plt.ylabel(r"$\sigma$")
-plt.xticks(labels[::200], labels[::200] + 1)
+metrics.append([acc, f1, roc_auc, elapsed_time])
 
-plt.tight_layout()
-plt.show()
+# Results
+precisions_folder = get_folder("eval/benchmarks/rffnet/amazon/precisions")
+metrics_folder = get_folder("eval/benchmarks/rffnet/amazon/metrics")
+models_folder = get_folder("eval/benchmarks/rffnet/amazon/models")
 
-# 8) Save results.
-np.savetxt("experiments/amazon/results/rffnet_results.txt", results)
-np.savetxt("experiments/amazon/results/rffnet_precisions.txt", best_model.precisions_)
-joblib.dump(best_model, "experiments/amazon/models/reg_rff.joblib")
+np.savetxt(f"{precisions_folder}/precisions.txt", precisions)
+np.savetxt(f"{metrics_folder}/metrics.txt", metrics)
+joblib.dump(best_model, f"{models_folder}/model.joblib")

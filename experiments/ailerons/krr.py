@@ -1,42 +1,32 @@
-import os
 import time
 import joblib
 
 import numpy as np
 import optuna
-import matplotlib.pyplot as plt
+import pandas as pd
 from sklearn.preprocessing import StandardScaler
 from sklearn.kernel_ridge import KernelRidge
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import mean_squared_error
 
-from pyselect.utils import best_model_callback, get_mse_confidence_interval
+from pyselect.utils import best_model_callback, get_mse_confidence_interval, get_folder
 
 test_size = 10 ** 3
 train_size = 11 * 10 ** 3
 val_size = 10 ** 3
 
-results = []
-
-rng = np.random.RandomState(0)
+metrics = []
 
 # Dataset
-filename_train = os.path.join("data/ailerons/Ailerons", "ailerons.data")
-filename_test = os.path.join("data/ailerons/Ailerons", "ailerons.test")
-
-data_train = np.loadtxt(filename_train, delimiter=",")
-data_test = np.loadtxt(filename_test, delimiter=",")
-
-data = np.vstack((data_train, data_test))
-
-X, y = data[:, 0:40], data[:, 40].reshape(-1, 1)
+data = pd.read_csv("data/processed/ailerons.csv")
+X = data.drop(["target"], axis=1)
+y = np.ravel(data[["target"]])
 
 X_train_val, X_test, y_train_val, y_test = train_test_split(
-    X, y, train_size=train_size + val_size, test_size=test_size, random_state=rng
+    X, y, train_size=train_size + val_size, test_size=test_size, random_state=0
 )
-
 X_train, X_val, y_train, y_val = train_test_split(
-    X_train_val, y_train_val, test_size=val_size, random_state=rng
+    X_train_val, y_train_val, test_size=val_size, random_state=0
 )
 
 scaler = StandardScaler()
@@ -76,9 +66,13 @@ study.optimize(objective, callbacks=[best_model_callback])
 best_model = study.user_attrs["best_model"]
 
 best_model_pred = best_model.predict(X_test)
-center, band = get_mse_confidence_interval(y_test, best_model_pred)
-results.append([center, band, study.best_trial.user_attrs["fitting_time"]])
 
-# Save results.
-np.savetxt("experiments/ailerons/results/krr_results.txt", np.array(results))
-joblib.dump(best_model, "experiments/ailerons/models/best_krr.joblib")
+center, band = get_mse_confidence_interval(y_test, best_model_pred)
+metrics.append([center, band, study.best_trial.user_attrs["fitting_time"]])
+
+# Save results
+metrics_folder = get_folder("eval/benchmarks/krr/ailerons/metrics")
+models_folder = get_folder("eval/benchmarks/krr/ailerons/models")
+
+np.savetxt(f"{metrics_folder}/metrics.txt", metrics)
+joblib.dump(best_model, f"{models_folder}/model.joblib")
