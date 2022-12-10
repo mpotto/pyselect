@@ -137,9 +137,9 @@ package.json
 .flake8
 
 # Remove data
-data/**
 data/
 !**/config/data 
 eval/**
 eval/
 
+!scripts/data
