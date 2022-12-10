@@ -29,7 +29,6 @@ class BaseRFFNet(BaseEstimator, metaclass=ABCMeta):
         min_delta_fraction=1.0,
         validation_fraction=0.1,
         n_iter_no_change=20,
-        device="cpu",
         random_state=None,
         torch_seed=None,
         verbose=False,
@@ -50,8 +49,6 @@ class BaseRFFNet(BaseEstimator, metaclass=ABCMeta):
         self.n_iter_no_change = n_iter_no_change
         self.validation_fraction = validation_fraction
         self.min_delta_fraction = min_delta_fraction
-
-        self.device = device
 
         self.random_state = random_state
         self.torch_seed = torch_seed
@@ -88,10 +85,10 @@ class BaseRFFNet(BaseEstimator, metaclass=ABCMeta):
 
         self.model = RFFNet(
             [X.shape[1], self.hidden_layer_size, output_shape], sampler=self.sampler
-        ).to(self.device)
+        )
 
     def _cast_input(self, X, y=None):
-        X = torch.FloatTensor(X).to(self.device)
+        X = torch.FloatTensor(X)
         if y is None:
             return X
         y = self._convert_y(y)
@@ -132,7 +129,7 @@ class RFFNetRegressor(RegressorMixin, MultiOutputMixin, BaseRFFNet):
     criterion = torch.nn.MSELoss()
 
     def _convert_y(self, y):
-        y = torch.FloatTensor(y).to(self.device)
+        y = torch.FloatTensor(y)
         if len(y.shape) == 1:
             y = y.view(-1, 1)
         return y
@@ -154,7 +151,7 @@ class RFFNetClassifier(ClassifierMixin, BaseRFFNet):
     criterion = torch.nn.CrossEntropyLoss()
 
     def _convert_y(self, y):
-        y = torch.LongTensor(y).to(self.device)
+        y = torch.LongTensor(y)
         assert len(y.shape) == 1, "y must be 1D"
         return y
 
