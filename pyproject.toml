@@ -11,7 +11,12 @@ authors = []
 python = ">=3.8,<4.0"
 numpy = "^1.22.2"
 scikit-learn = "^1.1.1"
-torch = "^1.13.0"
+torch = { version = "1.13.0", source = "torch" }
+
+[[tool.poetry.source]]
+name = "torch"
+url = "https://download.pytorch.org/whl/cpu/"
+secondary = true
 
 [tool.poetry.dev-dependencies]
 black = "^21.7b0"
