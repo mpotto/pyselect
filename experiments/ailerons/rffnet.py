@@ -17,9 +17,6 @@ val_size = 10 ** 3
 
 metrics = []
 
-seed_sequence = np.random.SeedSequence(entropy=0)
-seed = seed_sequence.generate_state(1)[0]
-
 # Dataset
 data = pd.read_csv("data/processed/ailerons.csv")
 X = data.drop(["target"], axis=1).to_numpy()
@@ -40,13 +37,17 @@ X_test = scaler.transform(X_test)
 
 def objective(trial):
     lr = trial.suggest_float("lr", 1e-5, 1e-2, log=True)
-    alpha = trial.suggest_float("alpha", 1e-7, 1e-1, log=True)
+    alpha = trial.suggest_float("alpha", 1e-7, 1, log=True)
+    entropy = trial.suggest_int("entropy", 1, 100)
+    
+    seed_sequence = np.random.SeedSequence(entropy=entropy)
+    seed = seed_sequence.generate_state(1)[0]
 
     # Model
     model = RFFNetRegressor(
         lr=lr,
         alpha=alpha,
-        batch_size=train_size // 10,
+        batch_size=110,
         validation_fraction=0.1,
         n_iter_no_change=20,
         torch_seed=seed,
@@ -67,8 +68,9 @@ def objective(trial):
 
 
 search_space = {
-    "lr": [1e-4, 1e-3, 1e-2],
+    "lr": [1e-4],
     "alpha": [1e-7, 1e-6, 1e-5, 1e-4, 1e-3, 1e-2, 1e-1, 1],
+    "entropy":[1, 2, 3, 4, 5],
 }
 
 study = optuna.create_study(sampler=optuna.samplers.GridSampler(search_space))

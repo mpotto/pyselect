@@ -28,7 +28,7 @@ X_train, X_val, y_train, y_val = train_test_split(
     random_state=0,
 )
 
-tfidf_vect = TfidfVectorizer(max_features=2000)
+tfidf_vect = TfidfVectorizer(max_features=5000)
 
 X_train = tfidf_vect.fit_transform(X_train).toarray()
 X_val = tfidf_vect.transform(X_val).toarray()

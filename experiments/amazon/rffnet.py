@@ -23,7 +23,7 @@ y_test = np.load("data/splitted/amazon/y_test.npy")
 
 # Subsample for finding best parameters
 X_sub, y_sub = resample(
-    X_train, y_train, n_samples=10 ** 3, stratify=y_train, random_state=0
+    X_train, y_train, n_samples=10 ** 4, stratify=y_train, random_state=0
 )
 sub_size = X_sub.shape[0]
 
@@ -41,7 +41,7 @@ def objective(trial):
         alpha=alpha,
         validation_fraction=0.1,
         n_iter_no_change=10,
-        batch_size=sub_size // 10,
+        batch_size=500,
         torch_seed=seed,
         random_state=0,
     )
@@ -72,7 +72,7 @@ best_model = study.user_attrs["best_model"]
 best_model.verbose = True
 best_model.log_rate = 5
 best_model.n_iter_no_change = 10
-best_model.batch_size = len(X_train) // 10
+best_model.batch_size = 500
 
 t_start = time.time()
 best_model.fit(X_train, y_train)

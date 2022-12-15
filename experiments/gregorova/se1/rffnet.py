@@ -47,7 +47,7 @@ def objective(trial):
         alpha=alpha,
         validation_fraction=0.1,
         n_iter_no_change=10,
-        batch_size=train_size // 10,
+        batch_size=250,
         torch_seed=seed,
         random_state=0,
     )
@@ -66,7 +66,7 @@ def objective(trial):
 
 
 search_space = {
-    "lr": [1e-5, 1e-4, 1e-3, 1e-2],
+    "lr": [1e-4, 1e-3, 1e-2],
     "alpha": [1e-7, 1e-6, 1e-5, 1e-4, 1e-3, 1e-2, 1e-1],
 }
 

@@ -60,8 +60,9 @@ for index, exp in enumerate(exp_configs):
             lr=lr,
             alpha=alpha,
             validation_fraction=0.1,
-            n_iter_no_change=30,
+            n_iter_no_change=10,
             torch_seed=seed,
+            batch_size = 250,
             random_state=0,
         )
 

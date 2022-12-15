@@ -18,13 +18,10 @@ val_size = 10 ** 3
 
 metrics = []
 
-seed_sequence = np.random.SeedSequence(entropy=0)
-seed = seed_sequence.generate_state(1)[0]
-
 # Dataset
 data = pd.read_csv("data/processed/cpusmall.csv")
 X = data.drop(["target"], axis=1).to_numpy()
-y = np.ravel(data[["target"]]).to_numpy()
+y = np.ravel(data[["target"]]).reshape(-1, 1)
 
 X_train_val, X_test, y_train_val, y_test = train_test_split(
     X, y, train_size=train_size + val_size, test_size=test_size, random_state=0
@@ -42,14 +39,19 @@ X_test = scaler.transform(X_test)
 def objective(trial):
     lr = trial.suggest_float("lr", 1e-4, 1e-2, log=True)
     alpha = trial.suggest_float("alpha", 1e-7, 1, log=True)
+    entropy = trial.suggest_int("entropy", 1, 100)
+    
+    seed_sequence = np.random.SeedSequence(entropy=0)
+    seed = seed_sequence.generate_state(1)[0]
+
 
     # Model
     model = RFFNetRegressor(
         lr=lr,
         alpha=alpha,
         validation_fraction=0.1,
-        n_iter_no_change=30,
-        bath_size=train_size // 10,
+        n_iter_no_change=20,
+        batch_size=train_size // 10,
         torch_seed=seed,
         random_state=0,
     )
@@ -68,8 +70,9 @@ def objective(trial):
 
 
 search_space = {
-    "lr": [1e-4, 1e-3, 1e-2],
-    "alpha": [1e-6, 1e-5, 1e-4, 1e-3, 1e-2, 1e-1, 1],
+    "lr": [1e-3, 1e-2],
+    "alpha": [1e-7, 1e-6, 1e-5, 1e-4],
+    "entropy": [1, 2, 3, 4, 5],
 }
 
 study = optuna.create_study(sampler=optuna.samplers.GridSampler(search_space))

@@ -23,8 +23,8 @@ torch.manual_seed(seed)
 
 # Dataset
 data = pd.read_csv("data/processed/cpusmall.csv")
-X = data.drop(["target"], axis=1)
-y = np.ravel(data[["target"]])
+X = data.drop(["target"], axis=1).to_numpy()
+y = np.ravel(data[["target"]]).reshape(-1, 1)
 
 X_train_val, X_test, y_train_val, y_test = train_test_split(
     X, y, train_size=train_size + val_size, test_size=test_size, random_state=0
