@@ -11,5 +11,8 @@ mprof peak | grep -Eo '[+-]?([0-9]*[.])?[0-9]+ MiB' > eval/benchmarks/rffnet/cpu
 mprof run experiments/cpusmall/srff.py
 mprof peak | grep -Eo '[+-]?([0-9]*[.])?[0-9]+ MiB' > eval/benchmarks/srff/cpusmall/metrics/memory.txt
 
+mprof run experiments/cpusmall/gam.py
+mprof peak | grep -Eo '[+-]?([0-9]*[.])?[0-9]+ MiB' > eval/benchmarks/gam/cpusmall/metrics/memory.txt
+
 mprof clean
 
