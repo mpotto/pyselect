@@ -13,4 +13,10 @@ mprof peak | grep -Eo '[+-]?([0-9]*[.])?[0-9]+ MiB' > eval/benchmarks/rffnet/hig
 mprof run experiments/higgs/xgb.py
 mprof peak | grep -Eo '[+-]?([0-9]*[.])?[0-9]+ MiB' > eval/benchmarks/xgb/higgs/metrics/memory.txt
 
+mprof run experiments/higgs/nn.py
+mprof peak | grep -Eo '[+-]?([0-9]*[.])?[0-9]+ MiB' > eval/benchmarks/nn/higgs/metrics/memory.txt
+
+mprof run experiments/higgs/rffnetp.py
+mprof peak | grep -Eo '[+-]?([0-9]*[.])?[0-9]+ MiB' > eval/benchmarks/rffnetp/higgs/metrics/memory.txt
+
 mprof clean

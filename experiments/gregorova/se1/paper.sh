@@ -14,6 +14,12 @@ mprof peak | grep -Eo '[+-]?([0-9]*[.])?[0-9]+ MiB' > eval/benchmarks/srff/se1/m
 mprof run experiments/gregorova/se1/gam.py
 mprof peak | grep -Eo '[+-]?([0-9]*[.])?[0-9]+ MiB' > eval/benchmarks/gam/se1/metrics/memory.txt
 
+mprof run experiments/gregorova/se1/rffnetp.py
+mprof peak | grep -Eo '[+-]?([0-9]*[.])?[0-9]+ MiB' > eval/benchmarks/rffnetp/se1/metrics/memory.txt
+
+mprof run experiments/gregorova/se1/nn.py
+mprof peak | grep -Eo '[+-]?([0-9]*[.])?[0-9]+ MiB' > eval/benchmarks/nn/se1/metrics/memory.txt
+
 mprof clean
 
 python experiments/gregorova/se1/rffnet_scaling.py
