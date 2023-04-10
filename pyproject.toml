@@ -20,6 +20,8 @@ matplotlib = "^3.6.2"
 tqdm = "^4.64.1"
 requests = "^2.28.1"
 nltk = "^3.7"
+pygam = "^0.8.0"
+jupyterlab = "^3.6.3"
 
 [[tool.poetry.source]]
 name = "torch"
